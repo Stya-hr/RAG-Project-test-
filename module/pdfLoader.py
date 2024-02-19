@@ -6,7 +6,7 @@ from treelib import Tree
 import json
 
 
-class pdfReader(Tree):
+class pdfReader():
     """pdf处理器"""
 
     def __init__(self, file_path: str) -> None:
@@ -19,6 +19,7 @@ class pdfReader(Tree):
     def tree_spliter(self) -> Tree:
         """生成pdf多叉树"""
         chapter_tree = Tree()
+        err_count = 0
         chapter_tree.create_node(
             tag=self.file_path, identifier="root", data=self.file_path
         )
@@ -26,7 +27,7 @@ class pdfReader(Tree):
         for i in range(len(self.toc)):
             level = self.toc[i][0]
             id_title = self.toc[i][1]
-            id = self.get_id(level)
+            id = self.__get_id__(level)
             id_parent = re.sub(r"[.]\d*$", "", id)  # 父节点id
             # 去除标题中的序号
             title = re.sub(r'^\d([.]\d*)*[^\u4E00-\u9FA5A-Za-z]*','',id_title)
@@ -65,7 +66,7 @@ class pdfReader(Tree):
                             chapter = chapter_plain.group(0)
                             # print("{}:*{}".format(title,title_1))
                         else:
-                            print("!!!!type error!!!!")
+                            err_count += 1
                 chapter_tree.create_node(
                     tag=title, identifier=id, parent=id_parent, data=chapter
                 )
@@ -74,9 +75,10 @@ class pdfReader(Tree):
                     tag=title, identifier=id, parent=id_parent, data=title
                 )
             loading_bar.update(1)
+        print("missing:", str((err_count/len(self.toc))*100),"%")
         return chapter_tree
 
-    def get_id(self, level: int) -> str:
+    def __get_id__(self, level: int) -> str:
         """获取当前树节点id"""
         self.id[level - 1] += 1  # 注意index-level对应关系
         id = str(self.id[0])
@@ -88,7 +90,7 @@ class pdfReader(Tree):
                 self.id[i] = 0
         return id
 
-    def from_json(cls, file_path: str) -> Tree:
+    def from_json(file_path: str) -> Tree:
         """从json文件加载多叉树"""
         with open(file_path, "r") as f:
             data = json.load(f)
