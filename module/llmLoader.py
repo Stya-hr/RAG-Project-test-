@@ -7,7 +7,7 @@ from treelib import Tree
 
 client = OpenAI(
     model="",
-    api_key="sk-M2zfKQU0xM5fkCj8E71562WDkTY43ZlnGhh5lvpjkIBAmz7Q",
+    api_key="",
     system_prompt="",
 )
 
